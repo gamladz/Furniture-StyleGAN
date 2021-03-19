@@ -2,6 +2,14 @@ import boto3
 import os
 import progressbar
 
+
+def white_background():
+    '''
+    Filter the downloaded images and take only those 
+    pictures with a white background
+    '''
+    pass
+
 BUCKET_NAME = 'ikea-dataset'
 
 # Check the size of the dataset
@@ -18,9 +26,9 @@ page_iterator = paginator.paginate(Bucket=BUCKET_NAME)
 
 # Create a progress bar, so it tells how much is left
 bar = progressbar.ProgressBar(
-maxval=size,
-widgets=[progressbar.Bar('=', '[', ']'),
-            ' ', progressbar.Percentage()])
+        maxval=size,
+        widgets=[progressbar.Bar('=', '[', ']'),
+                 ' ', progressbar.Percentage()])
 bar.start()
 r = 0
 
