@@ -4,10 +4,10 @@ import progressbar
 
 
 def white_background():
-    '''
-    Filter the downloaded images and take only those 
+    """
+    Filter the downloaded images and take only those
     pictures with a white background
-    '''
+    """
     pass
 
 BUCKET_NAME = 'ikea-dataset'
@@ -22,7 +22,10 @@ client = boto3.client('s3')
 # Create a reusable Paginator
 paginator = client.get_paginator('list_objects')
 # Create a PageIterator from the Paginator
-page_iterator = paginator.paginate(Bucket=BUCKET_NAME)
+# The Prefix='data' parameter ensures that we are only taking 
+# the images from the data folder
+page_iterator = paginator.paginate(Bucket=BUCKET_NAME,
+                                   Prefix='data/')
 
 # Create a progress bar, so it tells how much is left
 bar = progressbar.ProgressBar(
@@ -37,8 +40,11 @@ for page in page_iterator:
     for content in page['Contents']:
         # Create a directory for each type of furniture ('bin', 'cookware'...)
         os.makedirs(f"images/{content['Key'].split('/')[1]}", exist_ok=True)
-        LOCAL_FILE_NAME = f"images/{content['Key'].split('/')[1]}/{content['Key'].split('/')[-1]}"
-        client.download_file(BUCKET_NAME, content['Key'], LOCAL_FILE_NAME)
+        LOCAL_FILE_NAME = (f"images/{content['Key'].split('/')[1]}"
+                           + f"/{content['Key'].split('/')[-1]}")
+        if not os.path.exists(LOCAL_FILE_NAME):
+            client.download_file(BUCKET_NAME, content['Key'], LOCAL_FILE_NAME)
+        
         # Update the progress bar
         bar.update(r + 1)
         r += 1
