@@ -37,12 +37,12 @@ class ImageDataset(torch.utils.data.Dataset):
         Dictionary to translate the label to a 
         numeric value
     '''
-    def __init__(self, root_dir, transform=None, download=False,
+    def __init__(self, root_dir, transform=None, download=True,
                  BUCKET_NAME='ikea-dataset'):
         
         self.root_dir = root_dir
         if download:
-            self.download(self.root_dir, BUCKET_NAME=BUCKET_NAME)
+            self.download(self.root_dir, BUCKET_NAME)
         else:
             if not os.path.exists(root_dir):
                 raise RuntimeError('Dataset not found.' +
@@ -78,7 +78,7 @@ class ImageDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.files)
     
-    def download(root, BUCKET_NAME):
+    def download(self,root, BUCKET_NAME):
 
         # Check the size of the dataset
         s3 = boto3.resource('s3')
