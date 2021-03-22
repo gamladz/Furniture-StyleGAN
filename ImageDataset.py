@@ -7,6 +7,9 @@ import os
 import platform
 import boto3
 import progressbar
+import json
+import requests
+from pathlib import Path
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -82,6 +85,23 @@ class ImageDataset(torch.utils.data.Dataset):
     
     def download(self, root, BUCKET_NAME):
 
+        with open('DATA/data.json') as f:
+            data = json.load(f)
+
+        paths = ('/'.join(path.split('/')[1:]) for category in data.values() for item in category.values() for path in item['images'])
+
+        for path in paths:
+            # OS FRIENDLY WAYS TO GET THE IMG PATH AND DIR
+            fp = os.path.join(self.root_dir, *os.path.split(path))
+            dir = os.path.join(*os.path.split(fp)[:1])
+            Path(dir).mkdir(parents=True, exist_ok=True) # create dir if doesnt exist
+            response = requests.get(f'https://ikea-dataset.s3.us-east-2.amazonaws.com/{path}')
+            with open(fp, 'wb') as f:
+                f.write(response.content)
+            sdfsd
+            break
+            
+
         # Check the size of the dataset
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(BUCKET_NAME)
@@ -127,3 +147,6 @@ def split_train_test(dataset, train_percentage):
         dataset, [train_split, len(dataset) - train_split]
     )
     return train_dataset, validation_dataset
+
+if __name__ == '__main__':
+    dataset = ImageDataset(root_dir='images', download=True)
