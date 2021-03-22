@@ -93,14 +93,13 @@ class ImageDataset(torch.utils.data.Dataset):
         for path in paths:
             # OS FRIENDLY WAYS TO GET THE IMG PATH AND DIR
             fp = os.path.join(self.root_dir, *os.path.split(path))
+            if os.path.exists(fp):
+                continue
             dir = os.path.join(*os.path.split(fp)[:1])
             Path(dir).mkdir(parents=True, exist_ok=True) # create dir if doesnt exist
             response = requests.get(f'https://ikea-dataset.s3.us-east-2.amazonaws.com/{path}')
             with open(fp, 'wb') as f:
                 f.write(response.content)
-            sdfsd
-            break
-            
 
         # Check the size of the dataset
         s3 = boto3.resource('s3')
