@@ -126,3 +126,5 @@ dmypy.json
 
 # Others
 images/
+other_imgs/
+images.zip

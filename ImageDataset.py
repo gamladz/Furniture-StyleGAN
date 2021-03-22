@@ -16,7 +16,7 @@ class ImageDataset(torch.utils.data.Dataset):
     torch.utils.data.Dataset module.
     It loads all images from an image folder, creating labels
     for each image according to the subfolder containing the image
-    and transformt the images so they can be used in a model
+    and transform the images so they can be used in a model
     Parameters
     ----------
     root_dir: str
@@ -41,6 +41,7 @@ class ImageDataset(torch.utils.data.Dataset):
                  BUCKET_NAME='ikea-dataset'):
         
         self.root_dir = root_dir
+        self.BUCKET_NAME = BUCKET_NAME
         if download:
             self.download(self.root_dir, BUCKET_NAME)
         else:
@@ -60,7 +61,8 @@ class ImageDataset(torch.utils.data.Dataset):
         self.transform = transform
         if transform is None:
             self.transform = transforms.Compose([
-                transforms.Resize((128, 128)),
+                transforms.Resize(64),
+                transforms.CenterCrop(64),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
             ])
@@ -78,7 +80,7 @@ class ImageDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.files)
     
-    def download(self,root, BUCKET_NAME):
+    def download(self, root, BUCKET_NAME):
 
         # Check the size of the dataset
         s3 = boto3.resource('s3')
