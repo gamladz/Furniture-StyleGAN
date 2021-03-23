@@ -115,4 +115,12 @@ def split_train_test(dataset, train_percentage):
     return train_dataset, validation_dataset
 
 if __name__ == '__main__':
-    dataset = ImageDataset(root_dir='images', download=True)
+    dataset = ImageDataset(root_dir='images', download=True, transform=False)
+
+    # GIVE RANDOM EXAMPLE
+    while True:
+        idx = random.randint(0, len(dataset))
+        img, label = dataset[idx]
+        print(label)
+        img.show()
+        break # your computer will die if you remove this
