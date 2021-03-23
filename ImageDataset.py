@@ -41,7 +41,7 @@ class ImageDataset(torch.utils.data.Dataset):
         Dictionary to translate the label to a 
         numeric value
     '''
-    def __init__(self, root_dir, transform=None, download=True,
+    def __init__(self, root_dir, transform=True, download=True,
                  BUCKET_NAME='ikea-dataset'):
         
         self.root_dir = root_dir
@@ -66,7 +66,7 @@ class ImageDataset(torch.utils.data.Dataset):
         self.num_classes = len(self.labels)
         self.dict_encoder = {y: x for (x, y) in enumerate(self.labels)}
         self.transform = transform
-        if transform is None:
+        if transform is True:
             self.transform = transforms.Compose([
                 transforms.Resize(64),
                 transforms.CenterCrop(64),
@@ -77,7 +77,7 @@ class ImageDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
 
         img_name = self.files[index]
-        label = os.path.split(img_name)[0]
+        label = img_name.split(os.sep)[1]
         print(label)
         label = self.dict_encoder[label]
         label = torch.as_tensor(label)
