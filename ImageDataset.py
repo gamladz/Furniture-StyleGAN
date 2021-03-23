@@ -82,7 +82,8 @@ class ImageDataset(torch.utils.data.Dataset):
         label = self.dict_encoder[label]
         label = torch.as_tensor(label)
         image = Image.open(img_name)
-        image = self.transform(image)
+        if self.transform:
+            image = self.transform(image)
         return image, label
 
     def __len__(self):
