@@ -41,27 +41,17 @@ class ImageDataset(torch.utils.data.Dataset):
         Dictionary to translate the label to a 
         numeric value
     '''
-    def __init__(self, root_dir, transform=True, download=True,
-                 BUCKET_NAME='ikea-dataset'):
+    def __init__(self, root_dir, transform=True, download=True):
         
         self.root_dir = root_dir
-        # self.BUCKET_NAME = BUCKET_NAME
         if download:
             self.download(self.root_dir, BUCKET_NAME)
         else:
             if not os.path.exists(root_dir):
                 raise RuntimeError('Dataset not found.' +
                                    'You can use download=True to download it')
-        # Check the OS of the machine
-        # if platform.system() == 'Darwin':
-        #     self._sep = '/'
-        # else:
-        #     self._sep = '\\'
 
         self.files = glob.glob(os.path.join(f'{self.root_dir}', '*', '*', '*' + '.jpg'))
-        # print(self.files[0])
-        # print(self.files)
-        f = self.files[0]
         self.labels = list(set([fp.split(os.sep)[1] for fp in self.files]))
         self.num_classes = len(self.labels)
         self.dict_encoder = {y: x for (x, y) in enumerate(self.labels)}
@@ -71,14 +61,13 @@ class ImageDataset(torch.utils.data.Dataset):
                 transforms.Resize(64),
                 transforms.CenterCrop(64),
                 transforms.ToTensor(),
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) # is this right?
             ])
 
     def __getitem__(self, index):
 
         img_name = self.files[index]
         label = img_name.split(os.sep)[1]
-        print(label)
         label = self.dict_encoder[label]
         label = torch.as_tensor(label)
         image = Image.open(img_name)
