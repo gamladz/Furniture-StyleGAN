@@ -26,7 +26,7 @@ def download(root='images', BUCKET_NAME='ikea-dataset'):
     # The Prefix='data' parameter ensures that we are only taking 
     # the images from the data folder
     page_iterator = paginator.paginate(Bucket=BUCKET_NAME,
-                                    Prefix='data/')
+                                       Prefix='data/')
 
     # Create a progress bar, so it tells how much is left
     print('Downloading...')
