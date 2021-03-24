@@ -4,15 +4,16 @@ import torch
 import torchvision.transforms as transforms
 import glob
 import os
-import platform
-import boto3
-import progressbar
+import random
 import json
 import requests
 from pathlib import Path
 from tqdm import tqdm
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+def tmp_func(x):
+    return x.repeat(3, 1, 1)
 
 class ImageDataset(torch.utils.data.Dataset):
     '''
@@ -45,7 +46,7 @@ class ImageDataset(torch.utils.data.Dataset):
         
         self.root_dir = root_dir
         if download:
-            self.download(self.root_dir, BUCKET_NAME)
+            self.download(self.root_dir)
         else:
             if not os.path.exists(root_dir):
                 raise RuntimeError('Dataset not found.' +
@@ -61,7 +62,15 @@ class ImageDataset(torch.utils.data.Dataset):
                 transforms.Resize(64),
                 transforms.CenterCrop(64),
                 transforms.ToTensor(),
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) # is this right?
+                transforms.Normalize((0.5,), (0.5,)) # is this right?
+            ])
+            
+            self.transform_Gray = transforms.Compose([
+            transforms.Resize(64),
+            transforms.CenterCrop(64),
+            transforms.ToTensor(),
+            transforms.Lambda(tmp_func),
+            transforms.Normalize((0.5,), (0.5,))
             ])
 
     def __getitem__(self, index):
@@ -78,7 +87,7 @@ class ImageDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.files)
     
-    def download(self, root, BUCKET_NAME):
+    def download(self, root):
 
         with open('DATA/data.json') as f:
             data = json.load(f) # read data containing image paths
