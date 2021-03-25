@@ -4,11 +4,16 @@ import torch
 import torchvision.transforms as transforms
 import glob
 import os
-import platform
-import boto3
-import progressbar
+import random
+import json
+import requests
+from pathlib import Path
+from tqdm import tqdm
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+def tmp_func(x):
+    return x.repeat(3, 1, 1)
 
 class ImageDataset(torch.utils.data.Dataset):
     '''
@@ -37,89 +42,68 @@ class ImageDataset(torch.utils.data.Dataset):
         Dictionary to translate the label to a 
         numeric value
     '''
-    def __init__(self, root_dir, transform=None, download=True,
-                 BUCKET_NAME='ikea-dataset'):
+    def __init__(self, root_dir, transform=True, download=True):
         
         self.root_dir = root_dir
-        self.BUCKET_NAME = BUCKET_NAME
         if download:
-            self.download(self.root_dir, BUCKET_NAME)
+            self.download(self.root_dir)
         else:
             if not os.path.exists(root_dir):
                 raise RuntimeError('Dataset not found.' +
                                    'You can use download=True to download it')
-        # Check the OS of the machine
-        if platform.system() == 'Darwin':
-            self._sep = '/'
-        else:
-            self._sep = '\\'
 
-        self.files = glob.glob(f'{self.root_dir}{self._sep}*{self._sep}*.jpg')
-        self.labels = set([x.split(self._sep)[1] for x in self.files])
+        self.files = glob.glob(os.path.join(f'{self.root_dir}', '*', '*', '*' + '.jpg'))
+        self.labels = list(set([fp.split(os.sep)[1] for fp in self.files]))
         self.num_classes = len(self.labels)
         self.dict_encoder = {y: x for (x, y) in enumerate(self.labels)}
         self.transform = transform
-        if transform is None:
+        if transform is True:
             self.transform = transforms.Compose([
                 transforms.Resize(64),
                 transforms.CenterCrop(64),
                 transforms.ToTensor(),
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+                transforms.Normalize((0.5,), (0.5,)) # is this right?
+            ])
+            
+            self.transform_Gray = transforms.Compose([
+            transforms.Resize(64),
+            transforms.CenterCrop(64),
+            transforms.ToTensor(),
+            transforms.Lambda(tmp_func),
+            transforms.Normalize((0.5,), (0.5,))
             ])
 
     def __getitem__(self, index):
 
         img_name = self.files[index]
-        label = img_name.split(self._sep)[1]
+        label = img_name.split(os.sep)[1]
         label = self.dict_encoder[label]
         label = torch.as_tensor(label)
         image = Image.open(img_name)
-        image = self.transform(image)
+        if self.transform:
+            image = self.transform(image)
         return image, label
 
     def __len__(self):
         return len(self.files)
     
-    def download(self, root, BUCKET_NAME):
+    def download(self, root):
 
-        # Check the size of the dataset
-        s3 = boto3.resource('s3')
-        bucket = s3.Bucket(BUCKET_NAME)
-        size = sum(1 for _ in bucket.objects.all())
+        with open('DATA/data.json') as f:
+            data = json.load(f) # read data containing image paths
 
-        # Create a paginator object, so it ignores the 1000 limit
-        client = boto3.client('s3')
-        # Create a reusable Paginator
-        paginator = client.get_paginator('list_objects')
-        # Create a PageIterator from the Paginator
-        # The Prefix='data' parameter ensures that we are only taking 
-        # the images from the data folder
-        page_iterator = paginator.paginate(Bucket=BUCKET_NAME,
-                                        Prefix='data/')
+        paths = ('/'.join(path.split('/')[1:]) for category in data.values() for item in category.values() for path in item['images']) # generate paths
 
-        # Create a progress bar, so it tells how much is left
-        print('Downloading...')
-        bar = progressbar.ProgressBar(
-                maxval=size,
-                widgets=[progressbar.Bar('=', '[', ']'),
-                        ' ', progressbar.Percentage()])
-        bar.start()
-        r = 0
-
-        # Start the download
-        for page in page_iterator:
-            for content in page['Contents']:
-                # Create a directory for each type of furniture ('bin', 'cookware'...)
-                os.makedirs(f"{root}/{content['Key'].split('/')[1]}", exist_ok=True)
-                LOCAL_FILE_NAME = (f"{root}/{content['Key'].split('/')[1]}"
-                                + f"/{content['Key'].split('/')[-1]}")
-                if not os.path.exists(LOCAL_FILE_NAME):
-                    client.download_file(BUCKET_NAME, content['Key'], LOCAL_FILE_NAME)
-                
-                # Update the progress bar
-                bar.update(r + 1)
-                r += 1
-        bar.finish()
+        for path in tqdm(paths):
+            # OS FRIENDLY WAYS TO GET THE IMG PATH AND DIR
+            fp = os.path.join(self.root_dir, *os.path.split(path))
+            if os.path.exists(fp):
+                continue
+            dir = os.path.join(*os.path.split(fp)[:1])
+            Path(dir).mkdir(parents=True, exist_ok=True) # create dir if doesnt exist
+            response = requests.get(f'https://ikea-dataset.s3.us-east-2.amazonaws.com/data/{path}')
+            with open(fp, 'wb') as f:
+                f.write(response.content)
 
 def split_train_test(dataset, train_percentage):
     train_split = int(len(dataset) * train_percentage)
@@ -127,3 +111,14 @@ def split_train_test(dataset, train_percentage):
         dataset, [train_split, len(dataset) - train_split]
     )
     return train_dataset, validation_dataset
+
+if __name__ == '__main__':
+    dataset = ImageDataset(root_dir='images', download=True, transform=False)
+
+    # GIVE RANDOM EXAMPLE
+    while True:
+        idx = random.randint(0, len(dataset))
+        img, label = dataset[idx]
+        print(label)
+        img.show()
+        break # your computer will die if you remove this
