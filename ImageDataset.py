@@ -2,12 +2,11 @@ from PIL import Image
 from PIL import ImageFile
 import torch
 import torchvision.transforms as transforms
-import glob
 import os
-import platform
-import boto3
-import progressbar
 import json
+import requests
+from pathlib import Path
+from tqdm import tqdm
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -66,9 +65,9 @@ class ImageDataset(torch.utils.data.Dataset):
         # Instead we will use the json file with all the information about each piece 
         # of furniture
         
-        with open(f'{self.root_dir}/chair_ikea[4088].json') as json_file:
+        with open(f'{self.root_dir}/chair_ikea.json') as json_file:
             data = json.load(json_file)
-        
+
         files = []
         description = []
         price = []
@@ -128,7 +127,8 @@ class ImageDataset(torch.utils.data.Dataset):
         with open('DATA/data.json') as f:
             data = json.load(f) # read data containing image paths
 
-        paths = ('/'.join(path.split('/')[1:]) for category in data.values() for item in category.values() for path in item['images']) # generate paths
+        paths = ('/'.join(path.split('/')[1:]) for category in data.values()
+                 for item in category.values() for path in item['images']) # generate paths
 
         for path in tqdm(paths):
             # OS FRIENDLY WAYS TO GET THE IMG PATH AND DIR
