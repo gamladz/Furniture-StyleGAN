@@ -3,6 +3,10 @@ from PIL import ImageFile
 import torch
 import torchvision.transforms as transforms
 import os
+<<<<<<< HEAD
+=======
+import random
+>>>>>>> main
 import json
 import requests
 from pathlib import Path
@@ -11,7 +15,11 @@ from tqdm import tqdm
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def tmp_func(x):
+<<<<<<< HEAD
             return x.repeat(3, 1, 1)
+=======
+    return x.repeat(3, 1, 1)
+>>>>>>> main
 
 class ImageDataset(torch.utils.data.Dataset):
     '''
@@ -40,31 +48,15 @@ class ImageDataset(torch.utils.data.Dataset):
         Dictionary to translate the label to a 
         numeric value
     '''
-    def __init__(self, root_dir, transform=None, download=False,
-                 BUCKET_NAME='ikea-dataset'):
+    def __init__(self, root_dir, transform=True, download=True):
         
         self.root_dir = root_dir
         if download:
-            self.download(self.root_dir, BUCKET_NAME)
+            self.download(self.root_dir)
         else:
             if not os.path.exists(f'{self.root_dir}/images'):
                 raise RuntimeError('Dataset not found.' +
                                    'You can use download=True to download it')
-        # Keep this part of the code which organizes the data according to the 
-        # folder containing the image
-        
-        # Check the OS of the machine
-        # if platform.system() == 'Darwin':
-        #     self._sep = '/'
-        # else:
-        #     self._sep = '\\' + '\\'
-        # self._sep = '/'
-        # self.files = glob.glob(f'{self.root_dir}{self._sep}*{self._sep}*.jpg')
-        # self.labels = set([x.split(self._sep)[1] for x in self.files])
-        
-        # Instead we will use the json file with all the information about each piece 
-        # of furniture
-        
         with open(f'{self.root_dir}/chair_ikea.json') as json_file:
             data = json.load(json_file)
 
@@ -87,13 +79,13 @@ class ImageDataset(torch.utils.data.Dataset):
         self.num_classes = len(set(self.labels))
         self.dict_encoder = {y: x for (x, y) in enumerate(set(self.labels))}
         self.transform = transform
-        if transform is None:
+        if transform is True:
             self.transform = transforms.Compose([
                 transforms.Resize(64),
                 transforms.CenterCrop(64),
                 transforms.RandomHorizontalFlip(p=0.3),
                 transforms.ToTensor(),
-                transforms.Normalize((0.5,), (0.5,))
+                transforms.Normalize((0.5,), (0.5,)) # is this right?
             ])
 
         self.transform_Gray = transforms.Compose([
@@ -139,7 +131,6 @@ class ImageDataset(torch.utils.data.Dataset):
             response = requests.get(f'https://ikea-dataset.s3.us-east-2.amazonaws.com/data/{path}')
             with open(fp, 'wb') as f:
                 f.write(response.content)
-        
 
 def split_train_test(dataset, train_percentage):
     train_split = int(len(dataset) * train_percentage)
@@ -147,3 +138,14 @@ def split_train_test(dataset, train_percentage):
         dataset, [train_split, len(dataset) - train_split]
     )
     return train_dataset, validation_dataset
+
+if __name__ == '__main__':
+    dataset = ImageDataset(root_dir='images', download=True, transform=False)
+
+    # GIVE RANDOM EXAMPLE
+    while True:
+        idx = random.randint(0, len(dataset))
+        img, label = dataset[idx]
+        print(label)
+        img.show()
+        break # your computer will die if you remove this
