@@ -3,10 +3,7 @@ from PIL import ImageFile
 import torch
 import torchvision.transforms as transforms
 import os
-<<<<<<< HEAD
-=======
 import random
->>>>>>> main
 import json
 import requests
 from pathlib import Path
@@ -15,11 +12,7 @@ from tqdm import tqdm
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def tmp_func(x):
-<<<<<<< HEAD
-            return x.repeat(3, 1, 1)
-=======
     return x.repeat(3, 1, 1)
->>>>>>> main
 
 class ImageDataset(torch.utils.data.Dataset):
     '''
