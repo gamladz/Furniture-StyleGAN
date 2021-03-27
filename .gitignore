@@ -131,3 +131,4 @@ images.zip
 DATA/images
 GAN.pem
 runs*/
+model/
