@@ -72,7 +72,6 @@ class ImageDataset(torch.utils.data.Dataset):
         description = []
         price = []
         for furniture in data.keys():
-            print(furniture)
             for product in data[furniture].keys():
                 n_img = len(data[furniture][product]['image'])
                 for image in data[furniture][product]['image']:
@@ -124,7 +123,7 @@ class ImageDataset(torch.utils.data.Dataset):
     
     def download(self):
 
-        with open('DATA/data.json') as f:
+        with open('DATA/chair_ikea.json') as f:
             data = json.load(f) # read data containing image paths
 
         paths = ('/'.join(path.split('/')[1:]) for category in data.values()

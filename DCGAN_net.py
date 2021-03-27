@@ -60,7 +60,8 @@ class Generator(nn.Module):
 
     def forward(self, input):
         return self.main(input)
-    
+
+
 class Discriminator(nn.Module):
     '''
     Discriminator net for the DCGAN. It consists on
