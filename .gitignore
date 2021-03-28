@@ -130,6 +130,6 @@ other_imgs/
 images.zip
 DATA/images
 GAN.pem
-runs*/
+logs_runs/
 model/
 content/
