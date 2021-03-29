@@ -15,4 +15,9 @@ This repo has the following structure:
 | ├ WGAN.ipynb | Notebook for training a Deep Convolutional GAN with Wiesserstein Loss |
 | ├ cGAN.ipynb | Notebook for training a Conditional GAN |
 | └ Architectures | Folder that contains the architecture for each model |
+| <emsp>├ Conditional_WGAN_net.py | Notebook for training a cGAN with Weisserstein Loss |
+| ├ DCGAN.ipynb | Notebook for training a Deep Convolutional GAN |
+| ├ ImageDataset.py | Script which contains the class for defining the dataset |
+| ├ WGAN.ipynb | Notebook for training a Deep Convolutional GAN with Wiesserstein Loss |
+| ├ cGAN.ipynb | Notebook for training a Conditional GAN |
 
