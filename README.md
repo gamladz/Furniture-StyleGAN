@@ -54,4 +54,8 @@ If we run the Conditional WGAN, we will see the images throghout the training ep
 
 ![cWGAN_1000_epoch](https://user-images.githubusercontent.com/58112372/112843098-870fe680-90a2-11eb-98dc-60642ea4e235.gif)
 
+Once the model finishes training, it will be saved in a directory called model, so the user can use the generator to create new fake images with the already trained model, or can train them without the need of restarting from scratch.
+
+## Note
+
 The code is meant to be used with any set of images, but the user must create a json file with the description and directory of the image. This will be changed to support other type of files or structures. 
