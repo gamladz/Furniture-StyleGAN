@@ -129,5 +129,6 @@ DATA/images/
 other_imgs/
 images.zip
 GAN.pem
-runs*/
+logs_runs/
 model/
+content/

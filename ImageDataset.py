@@ -71,6 +71,7 @@ class ImageDataset(torch.utils.data.Dataset):
         self.files = files
         self.num_classes = len(set(self.labels))
         self.dict_encoder = {y: x for (x, y) in enumerate(set(self.labels))}
+        self.decoder = {x: y for (x, y) in enumerate(set(self.labels))}
         self.transform = transform
         if transform is True:
             self.transform = transforms.Compose([
