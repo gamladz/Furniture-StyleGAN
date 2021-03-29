@@ -2,6 +2,8 @@
 
 The project is part of the evaluation of Generative Adversarial Networks (GANs) for image synthesis. It uses a furniture dataset of ~1600 images to generate new images of chairs. The notebooks include implementations of DCGAN, CGAN and WGAN architectures. The main application is to allow furniture designers to generate new ideas and serve as an additional source of inspiration.
 
+![cWGAN_1000_epoch](https://user-images.githubusercontent.com/58112372/112843098-870fe680-90a2-11eb-98dc-60642ea4e235.gif)
+
 ## Content
 
 This repo has the following structure:
@@ -52,7 +54,6 @@ If we run the Conditional WGAN, we will see the images throghout the training ep
 `%load_ext tensorboard` <br>
 `%tensorboard --logdir='logs_runs/logs_cWGAN'`:<br>
 
-![cWGAN_1000_epoch](https://user-images.githubusercontent.com/58112372/112843098-870fe680-90a2-11eb-98dc-60642ea4e235.gif)
 
 Once the model finishes training, it will be saved in a directory called model, so the user can use the generator to create new fake images with the already trained model, or can train them without the need of restarting from scratch.
 
