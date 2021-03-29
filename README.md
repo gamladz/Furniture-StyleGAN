@@ -19,7 +19,7 @@ This repo has the following structure:
 |  \| &nbsp;├ DCGAN_net.py | Script with the Discriminator and Generator architectures of the **DCGAN** network <br> It also contains the weights initialization function.|
 |  \| &nbsp;├ WGAN_net.ipy | Script with the Discriminator and Generator architectures of the **Conditional WGAN** network <br> It also contains the weights initialization and the gradient penalty functions. |
 |  \| &nbsp;└ cGAN_net.py | Script with the Discriminator and Generator architectures of the **Conditional GAN** network <br> It also contains the weights initialization function. |
-| └ DATA | Notebook for training a Conditional GAN |
+| └ DATA | Folder that contains the json files that includes the description of the furniture, as well as the link to download each image |
 | &nbsp;&nbsp;└ chair_ikea.json | JSON file with the url to download the images of the furniture. It also includes other characteristics, <br> such as the price, and the description (from which the label is extracted). <br>The current model is solely working with chairs, but more data will be added|
 
 ## How to use this repo
