@@ -50,7 +50,8 @@ If we go to the Images tab, we can see the fake generated images:
 
 If we run the Conditional WGAN, we will see the images throghout the training epochs:
 `%load_ext tensorboard` <br>
-`%tensorboard --logdir='logs_runs/logs_cWGAN'`<br>:
+`%tensorboard --logdir='logs_runs/logs_cWGAN'`:<br>
 
 ![cWGAN_1000_epoch](https://user-images.githubusercontent.com/58112372/112843098-870fe680-90a2-11eb-98dc-60642ea4e235.gif)
 
+The code is meant to be used with any set of images, but the user must create a json file with the description and directory of the image. This will be changed to support other type of files or structures. 
