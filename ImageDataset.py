@@ -45,26 +45,12 @@ class ImageDataset(torch.utils.data.Dataset):
         
         self.root_dir = root_dir
         if download:
-            self.download(self.root_dir, BUCKET_NAME)
+            self.download()
         else:
             if not os.path.exists(f'{self.root_dir}/images'):
                 raise RuntimeError('Dataset not found.' +
                                    'You can use download=True to download it')
-        # Keep this part of the code which organizes the data according to the 
-        # folder containing the image
-        
-        # Check the OS of the machine
-        # if platform.system() == 'Darwin':
-        #     self._sep = '/'
-        # else:
-        #     self._sep = '\\' + '\\'
-        # self._sep = '/'
-        # self.files = glob.glob(f'{self.root_dir}{self._sep}*{self._sep}*.jpg')
-        # self.labels = set([x.split(self._sep)[1] for x in self.files])
-        
-        # Instead we will use the json file with all the information about each piece 
-        # of furniture
-        
+
         with open(f'{self.root_dir}/chair_ikea.json') as json_file:
             data = json.load(json_file)
 
@@ -85,7 +71,7 @@ class ImageDataset(torch.utils.data.Dataset):
         self.prices = price
         self.files = files
         self.num_classes = len(set(self.labels))
-        self.dict_encoder = {y: x for (x, y) in enumerate(set(self.labels))}
+        self.encoder = {y: x for (x, y) in enumerate(set(self.labels))}
         self.decoder = {x: y for (x, y) in enumerate(set(self.labels))}
         self.transform = transform
         if transform is None:
@@ -110,7 +96,7 @@ class ImageDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
 
         label = self.labels[index]
-        label = self.dict_encoder[label]
+        label = self.encoder[label]
         label = torch.as_tensor(label)
         image = Image.open(self.files[index])
         if image.mode != 'RGB':
@@ -128,7 +114,7 @@ class ImageDataset(torch.utils.data.Dataset):
             data = json.load(f) # read data containing image paths
 
         paths = ('/'.join(path.split('/')[1:]) for category in data.values()
-                 for item in category.values() for path in item['images']) # generate paths
+                 for item in category.values() for path in item['image']) # generate paths
 
         for path in tqdm(paths):
             # OS FRIENDLY WAYS TO GET THE IMG PATH AND DIR
@@ -138,7 +124,9 @@ class ImageDataset(torch.utils.data.Dataset):
             dir = os.path.join(*os.path.split(fp)[:1])
             Path(dir).mkdir(parents=True, exist_ok=True) # create dir if doesnt exist
             response = requests.get(f'https://ikea-dataset.s3.us-east-2.amazonaws.com/data/{path}')
-            with open(fp, 'wb') as f:
+            os.makedirs('DATA/images_test', exist_ok=True)
+            fp_write = os.path.join('DATA/images', os.path.split(fp)[-1])
+            with open(fp_write, 'wb') as f:
                 f.write(response.content)
         
 

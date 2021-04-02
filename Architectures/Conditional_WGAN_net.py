@@ -71,3 +71,30 @@ class Discriminator(nn.Module):
         embedding = self.embed(labels).view(labels.shape[0], 1, self.img_size, self.img_size)
         input = torch.cat([input, embedding], dim=1)
         return self.disc(input)
+
+def gradient_penalty(disc, labels, real, fake, device='cpu'):
+    batch_size, ch, h, w = real.shape
+    epsilon = torch.rand((batch_size, 1, 1, 1)).repeat(1, ch, h, w).to(device)
+    interpolated_images = real * epsilon + fake * (1 - epsilon)
+
+    mixed_scores = disc(interpolated_images, labels)
+    gradient = torch.autograd.grad(
+        inputs=interpolated_images,
+        outputs=mixed_scores,
+        grad_outputs = torch.ones_like(mixed_scores),
+        create_graph=True,
+        retain_graph=True,
+    )[0]
+    gradient = gradient.view(gradient.shape[0], -1)
+    gradient_norm = gradient.norm(2, dim=1)
+    gradient_pen = torch.mean((gradient_norm - 1) ** 2)
+    return gradient_pen
+
+
+def weights_init(m):
+    classname = m.__class__.__name__
+    if classname.find('Conv') != -1:
+        nn.init.normal_(m.weight.data, 0.0, 0.02)
+    elif classname.find('BatchNorm') != -1:
+        nn.init.normal_(m.weight.data, 1.0, 0.02)
+        nn.init.constant_(m.bias.data, 0)
