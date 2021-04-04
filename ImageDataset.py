@@ -37,13 +37,15 @@ class ImageDataset(torch.utils.data.Dataset):
         List with the directory of all images
     labels: set
         Contains the label of each sample
-    dict_encoder: dict
+    encoder: dict
         Dictionary to translate the label to a 
         numeric value
+    decoder: dict
+        Dictionary to translate the numeric value
+        to a label
     '''
     
-    def __init__(self, root_dir, transform=None, download=False,
-                 BUCKET_NAME='ikea-dataset'):
+    def __init__(self, root_dir, transform=None, download=False):
         
         self.root_dir = root_dir
         if download:
