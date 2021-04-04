@@ -78,7 +78,7 @@ The created model can be used for generating images. In the DCGAN and the WGAN m
 To generate the images, the script to use is ImageGeneration.py, which accepts the following arguments: <br>
 - n_img: number of images to generate
 - show: show the possible labels
-- label: furniture to generate!
+- label: furniture to generate
 - dir: directory of the model containing the generator
 
 In the command line, the user can write, for example:
