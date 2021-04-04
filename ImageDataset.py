@@ -1,18 +1,20 @@
+import torchvision.transforms as transforms
+from pathlib import Path
+from tqdm import tqdm
 from PIL import Image
 from PIL import ImageFile
+import requests
+import random
 import torch
-import torchvision.transforms as transforms
 import os
 import random
 import json
-import requests
-from pathlib import Path
-from tqdm import tqdm
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-def tmp_func(x):
-    return x.repeat(3, 1, 1)
+
+def repeat_channel(x):
+            return x.repeat(3, 1, 1)
 
 class ImageDataset(torch.utils.data.Dataset):
     '''
@@ -37,19 +39,24 @@ class ImageDataset(torch.utils.data.Dataset):
         List with the directory of all images
     labels: set
         Contains the label of each sample
-    dict_encoder: dict
+    encoder: dict
         Dictionary to translate the label to a 
         numeric value
+    decoder: dict
+        Dictionary to translate the numeric value
+        to a label
     '''
-    def __init__(self, root_dir, transform=True, download=True):
+
+    def __init__(self, root_dir, transform=None, download=False):
         
         self.root_dir = root_dir
         if download:
-            self.download(self.root_dir)
+            self.download()
         else:
             if not os.path.exists(f'{self.root_dir}/images'):
                 raise RuntimeError('Dataset not found.' +
                                    'You can use download=True to download it')
+
         with open(f'{self.root_dir}/chair_ikea.json') as json_file:
             data = json.load(json_file)
 
@@ -70,7 +77,7 @@ class ImageDataset(torch.utils.data.Dataset):
         self.prices = price
         self.files = files
         self.num_classes = len(set(self.labels))
-        self.dict_encoder = {y: x for (x, y) in enumerate(set(self.labels))}
+        self.encoder = {y: x for (x, y) in enumerate(set(self.labels))}
         self.decoder = {x: y for (x, y) in enumerate(set(self.labels))}
         self.transform = transform
         if transform is True:
@@ -87,7 +94,7 @@ class ImageDataset(torch.utils.data.Dataset):
             transforms.CenterCrop(64),
             transforms.RandomHorizontalFlip(p=0.3),
             transforms.ToTensor(),
-            transforms.Lambda(tmp_func),
+            transforms.Lambda(repeat_channel),
             transforms.Normalize((0.5,), (0.5,))
         ])
 
@@ -95,7 +102,7 @@ class ImageDataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
 
         label = self.labels[index]
-        label = self.dict_encoder[label]
+        label = self.encoder[label]
         label = torch.as_tensor(label)
         image = Image.open(self.files[index])
         if image.mode != 'RGB':
@@ -113,7 +120,7 @@ class ImageDataset(torch.utils.data.Dataset):
             data = json.load(f) # read data containing image paths
 
         paths = ('/'.join(path.split('/')[1:]) for category in data.values()
-                 for item in category.values() for path in item['images']) # generate paths
+                 for item in category.values() for path in item['image']) # generate paths
 
         for path in tqdm(paths):
             # OS FRIENDLY WAYS TO GET THE IMG PATH AND DIR
@@ -123,7 +130,9 @@ class ImageDataset(torch.utils.data.Dataset):
             dir = os.path.join(*os.path.split(fp)[:1])
             Path(dir).mkdir(parents=True, exist_ok=True) # create dir if doesnt exist
             response = requests.get(f'https://ikea-dataset.s3.us-east-2.amazonaws.com/data/{path}')
-            with open(fp, 'wb') as f:
+            os.makedirs('DATA/images_test', exist_ok=True)
+            fp_write = os.path.join('DATA/images', os.path.split(fp)[-1])
+            with open(fp_write, 'wb') as f:
                 f.write(response.content)
 
 def split_train_test(dataset, train_percentage):
@@ -132,6 +141,7 @@ def split_train_test(dataset, train_percentage):
         dataset, [train_split, len(dataset) - train_split]
     )
     return train_dataset, validation_dataset
+
 
 if __name__ == '__main__':
     dataset = ImageDataset(root_dir='images', download=True, transform=False)

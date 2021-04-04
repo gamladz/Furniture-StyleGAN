@@ -4,18 +4,29 @@ import torch.nn as nn
 
 
 class Generator(nn.Module):
-    def __init__(self, z_dim, img_ch, features_g):
+    def __init__(self, z_dim, img_ch, features_g, img_size=64):
         super(Generator, self).__init__()
-
-        self.main = nn.Sequential(
-            self._block(z_dim, features_g * 16, 4, 1, 0),
-            self._block(features_g * 16, features_g * 8, 4, 2, 1),
-            self._block(features_g * 8, features_g * 4, 4, 2, 1),
-            self._block(features_g * 4, features_g * 2, 4, 2, 1),
-            nn.ConvTranspose2d(features_g * 2, img_ch, 4, 2, 1),
-            nn.Tanh()
-            # state size. (nc) x 64 x 64
-        )
+        if img_size == 64:
+            self.main = nn.Sequential(
+                self._block(z_dim, features_g * 16, 4, 1, 0),
+                self._block(features_g * 16, features_g * 8, 4, 2, 1),
+                self._block(features_g * 8, features_g * 4, 4, 2, 1),
+                self._block(features_g * 4, features_g * 2, 4, 2, 1),
+                nn.ConvTranspose2d(features_g * 2, img_ch, 4, 2, 1),
+                nn.Tanh()
+                # state size. (nc) x 64 x 64
+            )
+        else:
+            self.main = nn.Sequential(
+                self._block(z_dim, features_g * 32, 4, 1, 0),
+                self._block(features_g * 32, features_g * 16, 4, 2, 1),
+                self._block(features_g * 16, features_g * 8, 4, 2, 1),
+                self._block(features_g * 8, features_g * 4, 4, 2, 1),
+                self._block(features_g * 4, features_g * 2, 4, 2, 1),
+                nn.ConvTranspose2d(features_g * 2, img_ch, 4, 2, 1),
+                nn.Tanh()
+                # state size. (nc) x 128 x 128
+            )
 
     def _block(self, in_channels, out_channels, kernel_size, stride, padding):
         return nn.Sequential(
@@ -36,19 +47,33 @@ class Generator(nn.Module):
         return self.main(input)
 
 class Discriminator(nn.Module):
-    def __init__(self, img_ch, features_d):
+    def __init__(self, img_ch, features_d, img_size=64):
         super(Discriminator, self).__init__()
-        self.disc = nn.Sequential(
-            # input is (nc) x 64 x 64
-            nn.Conv2d(img_ch, features_d, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf) x 32 x 32
-            self._block(features_d, features_d * 2, 4, 2, 1),
-            self._block(features_d * 2, features_d * 4, 4, 2, 1),
-            self._block(features_d * 4, features_d * 8, 4, 2, 1),
-            # state size. (ndf*8) x 4 x 4
-            nn.Conv2d(features_d * 8, 1, 4, 2, 0, bias=False),
-        )
+        if img_size == 64:
+            self.disc = nn.Sequential(
+                # input is (nc) x 64 x 64
+                nn.Conv2d(img_ch, features_d, kernel_size=4, stride=2, padding=1, bias=False),
+                nn.LeakyReLU(0.2, inplace=True),
+                # state size. (ndf) x 32 x 32
+                self._block(features_d, features_d * 2, 4, 2, 1),
+                self._block(features_d * 2, features_d * 4, 4, 2, 1),
+                self._block(features_d * 4, features_d * 8, 4, 2, 1),
+                # state size. (ndf*8) x 4 x 4
+                nn.Conv2d(features_d * 8, 1, 4, 2, 0, bias=False),
+            )
+        else:
+            self.disc = nn.Sequential(
+                # input is (nc) x 128 x 128
+                nn.Conv2d(img_ch, features_d, kernel_size=4, stride=2, padding=1, bias=False),
+                nn.LeakyReLU(0.2, inplace=True),
+                # state size. (ndf) x 32 x 32
+                self._block(features_d, features_d * 2, 4, 2, 1),
+                self._block(features_d * 2, features_d * 4, 4, 2, 1),
+                self._block(features_d * 4, features_d * 8, 4, 2, 1),
+                self._block(features_d * 8, features_d * 16, 4, 2, 1),
+                # state size. (ndf*8) x 4 x 4
+                nn.Conv2d(features_d * 16, 1, 4, 2, 0, bias=False),
+            )
     
     def _block(self, in_channels, out_channels, kernel_size, stride, padding):
         return nn.Sequential(
