@@ -1,16 +1,17 @@
-from PIL import Image
-from PIL import ImageFile
-import torch
 import torchvision.transforms as transforms
-import os
-import json
-import requests
 from pathlib import Path
 from tqdm import tqdm
+from PIL import Image
+from PIL import ImageFile
+import requests
+import random
+import torch
+import os
+import json
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-def tmp_func(x):
+def repeat_channel(x):
             return x.repeat(3, 1, 1)
 
 class ImageDataset(torch.utils.data.Dataset):
@@ -40,6 +41,7 @@ class ImageDataset(torch.utils.data.Dataset):
         Dictionary to translate the label to a 
         numeric value
     '''
+    
     def __init__(self, root_dir, transform=None, download=False,
                  BUCKET_NAME='ikea-dataset'):
         
@@ -88,7 +90,7 @@ class ImageDataset(torch.utils.data.Dataset):
             transforms.CenterCrop(64),
             transforms.RandomHorizontalFlip(p=0.3),
             transforms.ToTensor(),
-            transforms.Lambda(tmp_func),
+            transforms.Lambda(repeat_channel),
             transforms.Normalize((0.5,), (0.5,))
         ])
 
@@ -136,3 +138,15 @@ def split_train_test(dataset, train_percentage):
         dataset, [train_split, len(dataset) - train_split]
     )
     return train_dataset, validation_dataset
+
+
+if __name__ == '__main__':
+    dataset = ImageDataset(root_dir='images', download=True, transform=False)
+
+    # GIVE RANDOM EXAMPLE
+    while True:
+        idx = random.randint(0, len(dataset))
+        img, label = dataset[idx]
+        print(label)
+        img.show()
+        break # your computer will die if you remove this
