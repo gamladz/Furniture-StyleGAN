@@ -125,10 +125,9 @@ venv.bak/
 dmypy.json
 
 # Others
-images/
+DATA/images/
 other_imgs/
 images.zip
-DATA/images
 GAN.pem
 logs_runs/
 model/

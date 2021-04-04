@@ -7,9 +7,11 @@ import requests
 import random
 import torch
 import os
+import random
 import json
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 
 def repeat_channel(x):
             return x.repeat(3, 1, 1)
@@ -44,7 +46,7 @@ class ImageDataset(torch.utils.data.Dataset):
         Dictionary to translate the numeric value
         to a label
     '''
-    
+
     def __init__(self, root_dir, transform=None, download=False):
         
         self.root_dir = root_dir
@@ -78,13 +80,13 @@ class ImageDataset(torch.utils.data.Dataset):
         self.encoder = {y: x for (x, y) in enumerate(set(self.labels))}
         self.decoder = {x: y for (x, y) in enumerate(set(self.labels))}
         self.transform = transform
-        if transform is None:
+        if transform is True:
             self.transform = transforms.Compose([
                 transforms.Resize(64),
                 transforms.CenterCrop(64),
                 transforms.RandomHorizontalFlip(p=0.3),
                 transforms.ToTensor(),
-                transforms.Normalize((0.5,), (0.5,))
+                transforms.Normalize((0.5,), (0.5,)) # is this right?
             ])
 
         self.transform_Gray = transforms.Compose([
@@ -132,7 +134,6 @@ class ImageDataset(torch.utils.data.Dataset):
             fp_write = os.path.join('DATA/images', os.path.split(fp)[-1])
             with open(fp_write, 'wb') as f:
                 f.write(response.content)
-        
 
 def split_train_test(dataset, train_percentage):
     train_split = int(len(dataset) * train_percentage)
