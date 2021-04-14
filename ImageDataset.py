@@ -130,7 +130,7 @@ class ImageDataset(torch.utils.data.Dataset):
             dir = os.path.join(*os.path.split(fp)[:1])
             Path(dir).mkdir(parents=True, exist_ok=True) # create dir if doesnt exist
             response = requests.get(f'https://ikea-dataset.s3.us-east-2.amazonaws.com/data/{path}')
-            os.makedirs('DATA/images_test', exist_ok=True)
+            os.makedirs('DATA/images', exist_ok=True)
             fp_write = os.path.join('DATA/images', os.path.split(fp)[-1])
             with open(fp_write, 'wb') as f:
                 f.write(response.content)

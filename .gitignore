@@ -126,9 +126,12 @@ dmypy.json
 
 # Others
 DATA/images/
+DATA/chair_ikea
+DATA/images_test
 other_imgs/
 images.zip
 GAN.pem
 logs_runs/
 model/
 content/
+images/
