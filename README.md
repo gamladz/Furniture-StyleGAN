@@ -93,4 +93,4 @@ And the outcome will be:
 
 ## Note
 
-The code is meant to be used with any set of images, but the user must create a json file with the description and directory of the image. This will be changed to support other type of files or structures. 
+The code is meant to be used with any set of images, but the user must create a json file with the description and directory of the image. This will be changed to support other type of files or structures.
